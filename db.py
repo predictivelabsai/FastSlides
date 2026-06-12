@@ -13,9 +13,10 @@ THEME_BG = {"midnight": "#0f172a", "coral": "#db2777", "forest": "#065f46", "mon
 
 
 def connect():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
+    conn.execute("PRAGMA busy_timeout = 5000")
     return conn
 
 
@@ -110,3 +111,59 @@ def create_presentation(title, subtitle, theme, slide_list):
             conn.execute("INSERT INTO slides(presentation_id,position,title,body,layout) VALUES (?,?,?,?,?)",
                          (pid, i, s.get("title", ""), s.get("body", ""), s.get("layout", "content")))
     return pid
+
+
+# --- slide CRUD -------------------------------------------------------------
+
+def add_slide(pid: int, after_sid=None) -> int:
+    """Insert a blank slide after `after_sid` (or at the end). Returns new id."""
+    with cursor() as conn:
+        if after_sid:
+            pos = conn.execute("SELECT position FROM slides WHERE id=?", (after_sid,)).fetchone()
+            at = (pos[0] + 1) if pos else 999
+        else:
+            at = (conn.execute("SELECT COALESCE(MAX(position),-1)+1 FROM slides WHERE presentation_id=?", (pid,)).fetchone()[0])
+        conn.execute("UPDATE slides SET position = position + 1 WHERE presentation_id=? AND position >= ?", (pid, at))
+        conn.execute("INSERT INTO slides(presentation_id,position,title,body,layout) VALUES (?,?,?,?,'content')",
+                     (pid, at, "New slide", "- Point one\n- Point two"))
+        return conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+
+
+def delete_slide(sid: int) -> int | None:
+    """Delete a slide, returning the presentation id (and re-packing positions)."""
+    s = slide(sid)
+    if not s:
+        return None
+    pid = s["presentation_id"]
+    with cursor() as conn:
+        conn.execute("DELETE FROM slides WHERE id=?", (sid,))
+        # re-pack positions
+        for i, r in enumerate(conn.execute("SELECT id FROM slides WHERE presentation_id=? ORDER BY position, id", (pid,)).fetchall()):
+            conn.execute("UPDATE slides SET position=? WHERE id=?", (i, r[0]))
+    return pid
+
+
+def move_slide(sid: int, direction: int):
+    """direction: -1 up, +1 down. Swaps positions with the neighbour."""
+    s = slide(sid)
+    if not s:
+        return None
+    pid = s["presentation_id"]
+    ordered = rows("SELECT id, position FROM slides WHERE presentation_id=? ORDER BY position, id", (pid,))
+    idx = next((i for i, r in enumerate(ordered) if r["id"] == sid), None)
+    j = idx + direction
+    if idx is None or j < 0 or j >= len(ordered):
+        return pid
+    a, b = ordered[idx], ordered[j]
+    with cursor() as conn:
+        conn.execute("UPDATE slides SET position=? WHERE id=?", (b["position"], a["id"]))
+        conn.execute("UPDATE slides SET position=? WHERE id=?", (a["position"], b["id"]))
+    return pid
+
+
+def create_blank_deck(title: str, theme: str = "midnight") -> int:
+    title = (title or "Untitled deck").strip() or "Untitled deck"
+    return create_presentation(title, "Synthetic demo deck", theme, [
+        {"title": title, "body": "A new presentation", "layout": "title"},
+        {"title": "First slide", "body": "- Start here\n- Add your points", "layout": "content"},
+    ])

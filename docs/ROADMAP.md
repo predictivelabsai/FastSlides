@@ -17,9 +17,9 @@ demonstrator — and adds AI deck generation, which upstream doesn't have.
 
 ## Near-term roadmap 🔜
 
-1. **Add / delete / reorder slides** — currently you edit existing slides; add
+1. ✅ **Add / delete / reorder slides** (done) — plus
    new-slide, delete, and drag-to-reorder (`Slide.position`).
-2. **Create a blank deck** — start from scratch (today decks come from seed or AI).
+2. ✅ **Create a blank deck** (done).
 3. **Per-deck theme switching** + a custom-colour theme.
 4. **Images & media** — slide images/backgrounds (upload + layout variants).
 5. **Speaker notes** — a notes field per slide, shown in a presenter view.

@@ -40,7 +40,9 @@ def decks_list():
             Div(Span(f"{d['n']} slides"), Span(d["theme"]), cls="deck-meta"),
             href=f"/deck/{d['id']}", cls="deck-card"))
     return (_title("My Decks", f"{len(decks)} presentations",
-                   A("✨ New deck with AI", href="/generate", cls="btn primary")),
+                   Div(Form(Button("＋ Blank deck", cls="btn", type="submit"), method="post", action="/deck/new", style="display:inline;"),
+                       A("✨ New deck with AI", href="/generate", cls="btn primary"),
+                       style="display:flex;gap:8px;")),
             Div(*cards, cls="deck-grid") if cards else Div(P("No decks yet — generate one with AI."), style="color:var(--text-mute);padding:40px;"))
 
 
@@ -58,6 +60,8 @@ def deck_editor(pid, sid=None):
     thumbs = [A(Span(str(i + 1), cls="n"), Span(s["title"] or "(untitled)", cls="t"),
                 href=f"/deck/{pid}?sid={s['id']}", cls=f"thumb {'active' if s['id'] == current['id'] else ''}")
               for i, s in enumerate(slides)]
+    thumbs.append(Form(Button("＋ Add slide", cls="btn sm", type="submit", style="width:100%;"),
+                       method="post", action=f"/deck/{pid}/add?after={current['id']}", style="margin-top:6px;"))
 
     edit = Form(
         Div(Span("Slide layout", style="font-size:11px;text-transform:uppercase;color:var(--text-mute);font-weight:600;")),
@@ -70,10 +74,18 @@ def deck_editor(pid, sid=None):
         Div(Button("Save slide", cls="btn primary", type="submit"), style="margin-top:10px;"),
         method="post", action=f"/deck/{pid}/slide/{current['id']}", cls="edit-form")
 
+    pos = [s["id"] for s in slides].index(current["id"])
+    def _mv(label, direction, disabled):
+        return Form(Button(label, cls="btn sm", type="submit", disabled=disabled),
+                    method="post", action=f"/deck/{pid}/slide/{current['id']}/move?dir={direction}",
+                    style="display:inline;")
     center = Div(
-        Div(A(f"▶ Present", href=f"/present/{pid}", cls="btn primary"),
-            Span(f"  Slide {[s['id'] for s in slides].index(current['id'])+1} of {len(slides)}",
-                 style="color:var(--text-mute);margin-left:8px;"), cls="toolbar"),
+        Div(A("▶ Present", href=f"/present/{pid}", cls="btn primary"),
+            _mv("↑", -1, pos == 0), _mv("↓", 1, pos == len(slides) - 1),
+            Form(Button("🗑 Delete slide", cls="btn sm danger", type="submit", disabled=len(slides) <= 1),
+                 method="post", action=f"/deck/{pid}/slide/{current['id']}/delete", style="display:inline;"),
+            Span(f"Slide {pos+1} of {len(slides)}", style="color:var(--text-mute);margin-left:8px;"),
+            cls="toolbar", style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;"),
         slide_canvas(current, d["theme"]),
         edit)
     return (_title(d["title"], d["subtitle"] or "", A("← All decks", href="/", cls="btn")),

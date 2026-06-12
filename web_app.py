@@ -112,6 +112,38 @@ def post(session, pid: int, sid: int, title: str = "", body: str = "", layout: s
     return RedirectResponse(f"/deck/{pid}?sid={sid}", status_code=303)
 
 
+@rt("/deck/{pid}/add")
+def post(session, pid: int, after: int | None = None):
+    if not _user(session):
+        return RedirectResponse("/login", status_code=303)
+    nsid = db.add_slide(pid, after)
+    return RedirectResponse(f"/deck/{pid}?sid={nsid}", status_code=303)
+
+
+@rt("/deck/{pid}/slide/{sid}/delete")
+def post(session, pid: int, sid: int):
+    if not _user(session):
+        return RedirectResponse("/login", status_code=303)
+    db.delete_slide(sid)
+    return RedirectResponse(f"/deck/{pid}", status_code=303)
+
+
+@rt("/deck/{pid}/slide/{sid}/move")
+def post(session, pid: int, sid: int, dir: int = 1):
+    if not _user(session):
+        return RedirectResponse("/login", status_code=303)
+    db.move_slide(sid, -1 if dir < 0 else 1)
+    return RedirectResponse(f"/deck/{pid}?sid={sid}", status_code=303)
+
+
+@rt("/deck/new")
+def post(session, title: str = ""):
+    if not _user(session):
+        return RedirectResponse("/login", status_code=303)
+    pid = db.create_blank_deck(title)
+    return RedirectResponse(f"/deck/{pid}", status_code=303)
+
+
 @rt("/present/{pid}")
 def get(session, pid: int):
     if not _user(session):

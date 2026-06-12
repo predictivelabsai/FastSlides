@@ -75,6 +75,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{text-decoration:underline;}
 .edit-form textarea{min-height:140px;resize:vertical;font-family:ui-monospace,monospace;font-size:13px;}
 .btn{padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:13px;}
 .btn:hover{background:var(--surface-2);} .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);} .btn.primary:hover{background:var(--accent-hover);}
+.btn.sm{padding:4px 9px;font-size:12px;} .btn.danger{border-color:var(--danger);color:var(--danger);} .btn.danger:hover{background:var(--danger);color:#fff;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
 .toolbar{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
 .gen-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:640px;}
 .gen-card h3{margin:0 0 6px;} .gen-card .askbox{width:100%;padding:12px;border:1px solid var(--border);border-radius:8px;font-size:15px;}
