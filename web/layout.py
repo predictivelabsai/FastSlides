@@ -112,7 +112,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{text-decoration:underline;}
 """
 
 NAV = [("decks", "My Decks", "🎞️", "/"), ("generate", "Generate with AI", "✨", "/generate"),
-       ("ai", "AI Assistant", "🤖", "/ai"), ("guide", "User Guide", "📖", "/guide")]
+       ("ai", "AI Assistant", "🤖", "/ai"), ("guide", "User Guide", "📖", "/guide"),
+       ("developers", "Developers", "⌘", "/developers")]
 SAMPLE_QUESTIONS = ["How many decks do I have?", "Outline a deck on remote work", "Suggest a closing slide"]
 
 
