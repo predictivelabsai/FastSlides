@@ -469,6 +469,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "FastSME API token": []
+          }
+        ],
         "summary": "List presentations",
         "tags": [
           "Presentations"
@@ -586,6 +591,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "FastSME API token": []
+          }
+        ],
         "summary": "Get one presentations record",
         "tags": [
           "Presentations"
@@ -661,6 +671,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "FastSME API token": []
+          }
+        ],
         "summary": "List slides",
         "tags": [
           "Slides"
@@ -713,6 +728,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "FastSME API token": []
+          }
+        ],
         "summary": "Get one slides record",
         "tags": [
           "Slides"
